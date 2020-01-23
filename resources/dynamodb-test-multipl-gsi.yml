@@ -1,0 +1,42 @@
+Resources:
+  DynamoTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: primary
+          AttributeType: N
+      KeySchema:
+        - AttributeName: primary
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+# Move this logic to the serverless temaplate        
+  DynamoGSILambda:
+    DependsOn: DynamoTable
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: add_gsi.lambda_handler
+      Runtime: python3.6
+      CodeUri: .
+      Description: add multiple global secondary indexes to the dynamo table
+      MemorySize: 128
+      Timeout: 300
+      Role: <arn:aws:iam::role>
+      # Define event source mapping below
+      Environment:
+        Variables:
+          logging_level: INFO
+          TABLE_NAME: !Ref DynamoTable
+          GSI_1: global-secondary-index-1
+          GSI_2: global-secondary-index-2
+      Tags:
+        tag1: noblesse
+        tag2: oblige
+
+  DynamoGSICustom:
+    Type: Custom::AddMultipleDynamoGSIs
+    Version: 1701
+    Properties:
+      ServiceToken: !GetAtt DynamoGSILambda.Arn

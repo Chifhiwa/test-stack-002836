@@ -1,0 +1,312 @@
+#TODO: Create High, Medium and Low Capcity Units variables for DynamoDB Tables and update references on each table based on utilisation
+#TODO: Configure Global and Local Secondary Indexes for each Relevent Table
+
+#Define Parameters for DynamoDB Tables
+Parameters:
+#Read and Write Capacity Units for Main Tables
+  ReadCapacityUnits:
+    Description: Provisioned read throughput
+    Type: Number
+    Default: '5'
+    MinValue: '1'
+    MaxValue: '10000'
+    ConstraintDescription: must be between 5 and 10000
+  WriteCapacityUnits:
+    Description: Provisioned write throughput
+    Type: Number
+    Default: '5'
+    MinValue: '1'
+    MaxValue: '10000'
+    ConstraintDescription: must be between 5 and 10000
+#Read and Write Capacity Units for GSIs and LSIs
+  ReadCapacityUnitsIndex:
+    Description: Provisioned read throughput for GSIs and LSIs
+    Type: Number
+    Default: '1'
+    MinValue: '1'
+    MaxValue: '10000'
+    ConstraintDescription: must be between 5 and 10000
+  WriteCapacityUnitsIndex:
+    Description: Provisioned write throughput
+    Type: Number
+    Default: '1'
+    MinValue: '1'
+    MaxValue: '10000'
+    ConstraintDescription: must be between 5 and 10000
+
+
+# Create DynamoDB Tables
+Resources:
+  DynamoDbProducerTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+      - AttributeName: producerID
+        KeyType: HASH
+      AttributeDefinitions:
+      - AttributeName: producerID
+        AttributeType: S
+      TableName:
+        Fn::Sub: Tzero${self:custom.stage}_ProducerTable
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: ReadCapacityUnits
+        WriteCapacityUnits:
+          Ref: WriteCapacityUnits
+
+#####
+  DynamoDbProducerAdvertTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+      - AttributeName: advertisement_id
+        KeyType: HASH
+      AttributeDefinitions:
+      - AttributeName: advertisement_id
+        AttributeType: N
+      TableName:
+        Fn::Sub: Tzero${self:custom.stage}_ProducerAdvertTable
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: ReadCapacityUnits
+        WriteCapacityUnits:
+          Ref: WriteCapacityUnits
+##### 
+  DynamoDbProducerSupportTicketTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+      - AttributeName: supportTicketID
+        KeyType: HASH
+      AttributeDefinitions:
+      - AttributeName: supportTicketID
+        AttributeType: N
+      TableName:
+        Fn::Sub: Tzero${self:custom.stage}_ProducerSupportTicketTable
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: ReadCapacityUnits
+        WriteCapacityUnits:
+          Ref: WriteCapacityUnits
+#####
+  DynamoDbProducerIndustryTagsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+      - AttributeName: Industry
+        KeyType: HASH
+      AttributeDefinitions:
+      - AttributeName: Industry
+        AttributeType: S
+      TableName:
+        Fn::Sub: Tzero${self:custom.stage}_ProducerIndustryTagsTable
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: ReadCapacityUnits
+        WriteCapacityUnits:
+          Ref: WriteCapacityUnits
+#####
+  DynamoDbConsumerTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+      - AttributeName: Cognito_Id
+        KeyType: HASH
+      - AttributeName: Phone_Number
+        KeyType: RANGE
+      AttributeDefinitions:
+      - AttributeName: Cognito_Id
+        AttributeType: S
+      - AttributeName: Phone_Number
+        AttributeType: S
+      TableName:
+        Fn::Sub: Tzero${self:custom.stage}_ConsumerTable
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: ReadCapacityUnits
+        WriteCapacityUnits:
+          Ref: WriteCapacityUnits
+#####
+  DynamoDbConsumerTransactionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+      - AttributeName: TransactionId
+        KeyType: HASH
+      - AttributeName: Phone_Number
+        KeyType: RANGE
+      AttributeDefinitions:
+      - AttributeName: TransactionId
+        AttributeType: S
+      - AttributeName: Phone_Number
+        AttributeType: S
+      TableName:
+        Fn::Sub: Tzero${self:custom.stage}_ConsumerTransactionsTable
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: ReadCapacityUnits
+        WriteCapacityUnits:
+          Ref: WriteCapacityUnits
+#####
+  DynamoDbConsumerCredentialsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+      - AttributeName: User_Name
+        KeyType: HASH
+      AttributeDefinitions:
+      - AttributeName: User_Name
+        AttributeType: S
+      TableName:
+        Fn::Sub: Tzero${self:custom.stage}_ConsumerCredentialsTable
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: ReadCapacityUnits
+        WriteCapacityUnits:
+          Ref: WriteCapacityUnits
+#####
+  DynamoDbConsumerExperiencePointsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+      - AttributeName: transactionId
+        KeyType: HASH
+      AttributeDefinitions:
+      - AttributeName: transactionId
+        AttributeType: N
+      TableName:
+        Fn::Sub: Tzero${self:custom.stage}_ConsumerExperiencePointsTable
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: ReadCapacityUnits
+        WriteCapacityUnits:
+          Ref: WriteCapacityUnits
+#####
+  DynamoDbSurveyTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+      - AttributeName: survey_id
+        KeyType: HASH
+      AttributeDefinitions:
+      - AttributeName: survey_id
+        AttributeType: N
+      TableName:
+        Fn::Sub: Tzero${self:custom.stage}_SurveyTable
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: ReadCapacityUnits
+        WriteCapacityUnits:
+          Ref: WriteCapacityUnits
+#####
+  DynamoDbBusinessRulesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+      - AttributeName: ruleName
+        KeyType: HASH
+      AttributeDefinitions:
+      - AttributeName: ruleName
+        AttributeType: S
+      TableName:
+        Fn::Sub: Tzero${self:custom.stage}_BusinessRulesTable
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: ReadCapacityUnits
+        WriteCapacityUnits:
+          Ref: WriteCapacityUnits
+#####
+  DynamoDbBillingTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+      - AttributeName: transactionId
+        KeyType: HASH
+      - AttributeName: producerID
+        KeyType: RANGE
+      AttributeDefinitions:
+      - AttributeName: transactionId
+        AttributeType: S
+      - AttributeName: producerID
+        AttributeType: S
+      TableName:
+        Fn::Sub: Tzero${self:custom.stage}_BillingTable
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: ReadCapacityUnits
+        WriteCapacityUnits:
+          Ref: WriteCapacityUnits
+      # GlobalSecondaryIndexes:
+      # - IndexName: producerID-index
+      #   KeySchema:
+      #   - AttributeName: producerID
+      #     KeyType: HASH
+      #   Projection:
+      #     ProjectionType: ALL
+      #   ProvisionedThroughput:
+      #     ReadCapacityUnits:
+      #       Ref: ReadCapacityUnitsIndex
+      #     WriteCapacityUnits:
+      #       Ref: WriteCapacityUnitsIndex
+      # # - IndexName: adViewId-index
+      #   KeySchema:
+      #   - AttributeName: adViewId
+      #     KeyType: HASH
+      #   Projection:
+      #     ProjectionType: ALL
+      #   ProvisionedThroughput:
+      #     ReadCapacityUnits:
+      #       Ref: ReadCapacityUnitsIndex
+      #     WriteCapacityUnits:
+      #       Ref: WriteCapacityUnitsIndex       
+#####
+  DynamoDbCompetitionTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+      - AttributeName: competitionID
+        KeyType: HASH
+      AttributeDefinitions:
+      - AttributeName: competitionID
+        AttributeType: N
+      TableName:
+        Fn::Sub: Tzero${self:custom.stage}_CompetitionTable
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: ReadCapacityUnits
+        WriteCapacityUnits:
+          Ref: WriteCapacityUnits
+#####
+  DynamoDbTCoinsTransactionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+      - AttributeName: TransactionID
+        KeyType: HASH
+      AttributeDefinitions:
+      - AttributeName: TransactionID
+        AttributeType: S
+      TableName:
+        Fn::Sub: Tzero${self:custom.stage}_TCoinsTransactionsTable
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: ReadCapacityUnits
+        WriteCapacityUnits:
+          Ref: WriteCapacityUnits
+#####
+  DynamoDbConsumerSupportTickets:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      KeySchema:
+      - AttributeName: SupportTicketId
+        KeyType: HASH
+      AttributeDefinitions:
+      - AttributeName: SupportTicketId
+        AttributeType: S
+      TableName:
+        Fn::Sub: Tzero${self:custom.stage}_ConsumerSupportTickets
+      ProvisionedThroughput:
+        ReadCapacityUnits:
+          Ref: ReadCapacityUnits
+        WriteCapacityUnits:
+          Ref: WriteCapacityUnits

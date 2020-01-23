@@ -1,0 +1,65 @@
+org: tshifhiwa47
+app: tzero-app
+# NOTE: update this with your service name
+service: TZero
+
+# Create an optimized package for our functions
+package:
+  individually: true
+
+plugins:
+  - serverless-bundle # Package our functions with Webpack
+  - serverless-offline
+  - serverless-dotenv-plugin # Load .env as environment variables
+
+custom:
+  # Our stage is based on what is passed in when running serverless
+  # commands. Or fallsback to what we have set in the provider section.
+  stage: ${opt:stage, self:provider.stage}
+  # Set the table name here so we can use it while testing locally
+  # tableName: ${self:custom.stage}-notes
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: Dev
+  region: us-east-1
+
+  # These environment variables are made available to our functions
+  # under process.env.
+  # environment:
+  #   tableName: ${self:custom.tableName}
+  #   stripeSecretKey: ${env:STRIPE_SECRET_KEY}
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:*:*:*" #Every DynamoDB Table in this region
+  
+# you can add Lambda Functions resource templates here
+functions:
+  ProducerBalance:
+    handler: functions/producer/ProducerBalance.handler
+    events:
+      - http:
+          path: notes
+          method: post
+          cors: true
+          authorizer: aws_iam
+  hello:
+    handler: handler.hello
+# you can add CloudFormation resource templates here
+resources:
+  # Cognito-User-Pools
+  - ${file(resources/cognito-user-pools.yml)}
+    # DynamoDB Tables
+  - ${file(resources/dynamodb-tables.yml)}
+  #   # Test to Be Delted - DynamoDB Tables
+  # - ${file(resources/dynamodb-test-multipl-gsi.yml)}
